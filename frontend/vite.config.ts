@@ -1,15 +1,20 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api': 'http://localhost:4000',
-      '/ads-catalog': 'http://localhost:4000',
-      '/manifest': 'http://localhost:4000',
-      '/segments': 'http://localhost:4000',
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const apiUrl = env.API_URL || 'http://localhost:4000'
+
+  return {
+    plugins: [react()],
+    envPrefix: ['VITE_', 'API_'],
+    server: {
+      proxy: {
+        '/api': apiUrl,
+        '/ads-catalog': apiUrl,
+        '/manifest': apiUrl,
+        '/segments': apiUrl,
+      },
     },
-  },
+  }
 })

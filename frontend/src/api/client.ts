@@ -1,7 +1,14 @@
 import type { AdCreative, AnalyticsReport, StreamConfig, StreamStatusResponse } from '../types';
 
+/** Backend origin from frontend/.env (`API_URL`). Empty falls back to same-origin paths. */
+export function apiUrl(path: string): string {
+  const base = (import.meta.env.API_URL ?? '').replace(/\/$/, '');
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${normalized}`;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(apiUrl(path), {
     headers: { 'Content-Type': 'application/json' },
     ...init,
   });
@@ -13,7 +20,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  getAds: () => request<AdCreative[]>('/api/ads'),
+  getAds: async () => {
+    const ads = await request<AdCreative[]>('/api/ads');
+    return ads.map((ad) => ({
+      ...ad,
+      imageUrl: ad.imageUrl.startsWith('http') ? ad.imageUrl : apiUrl(ad.imageUrl),
+    }));
+  },
   getConfig: () => request<StreamConfig>('/api/config'),
   saveConfig: (patch: Partial<StreamConfig>) =>
     request<StreamConfig>('/api/config', { method: 'POST', body: JSON.stringify(patch) }),
