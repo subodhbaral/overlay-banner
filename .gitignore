@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.log
+.env
+.env.*
+*.tmp
+
+# Generated/runtime data (seed catalog is kept)
+data/config.json
+data/ad-segments/
+data/segment-cache/
+data/analytics/
